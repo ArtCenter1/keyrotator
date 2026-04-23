@@ -11,8 +11,32 @@ KeyRotator is a plug-and-play API key rotation system designed for development a
 
 ## 📸 Mission Control Dashboard
 
-![KeyRotator Mission Control Dashboard](https://via.placeholder.com/800x600/0f1419/8b5cf6?text=KeyRotator+Mission+Control+Dashboard)
-*Screenshot of the KeyRotator Mission Control dashboard showing real-time key monitoring, provider status, and management interface*
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           KeyRotator Mission Control                        │
+│                                                                             │
+│  ┌─ System Status ──────────────────┐  ┌─ Add New API Key ─────────────────┐ │
+│  │ Total Providers: 5              │  │ Provider: [Gemini ▼]              │ │
+│  │ Total Keys: 12                  │  │ Key: [••••••••••••••••••••••••]   │ │
+│  │ Healthy Keys: 10                │  │ Alias: [Production Key #1]        │ │
+│  │ Last Updated: 2 seconds ago     │  │ [Add Key]                         │ │
+│  └─────────────────────────────────┘  └────────────────────────────────────┘ │
+│                                                                             │
+│  ┌─ Provider Status ──────────────────────────────────────────────────────┐ │
+│  │ ┌─ Google Gemini ─┬─ Health: ████████░░ 80% ─┬─ Keys: 3 ─┬─ Actions ─┐ │ │
+│  │ │ Key #1 (AIz...9wk) │ HEALTHY │ RPM: 12/15 │ [Revive] [Delete] │ │ │
+│  │ │ Key #2 (AIz...8xl) │ RATE_LIMITED (45s) │ RPM: 15/15 │ [Revive] [Delete] │ │ │
+│  │ └─────────────────┴─────────────┴────────────┴─────────────────────┘ │ │
+│  │ ┌─ OpenRouter ────┬─ Health: ██████████ 100% ─┬─ Keys: 2 ─┬─ Actions ─┐ │ │
+│  │ │ Key #1 (sk-or...xyz) │ HEALTHY │ RPM: 28/50 │ [Revive] [Delete] │ │ │
+│  │ └─────────────────┴─────────────┴────────────┴─────────────────────┘ │ │
+│  └───────────────────────────────────────────────────────────────────────┘ │
+│                                                                             │
+│  Activity Log: Key rotation successful • Rate limit reset • New key added │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+*Interactive dashboard showing real-time key monitoring, provider health status, and management controls*
 
 ## ✨ Features
 
