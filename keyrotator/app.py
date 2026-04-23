@@ -17,7 +17,7 @@ class KeyRotatorApp:
     """Main KeyRotator application class."""
 
     def __init__(
-        self, config_path: str = None, host: str = "0.0.0.0", port: int = 8000
+        self, config_path: str = None, host: str = "0.0.0.0", port: int = 8001
     ):
         # Validate config_path for security
         if config_path:
@@ -82,18 +82,19 @@ class KeyRotatorApp:
 
     def run(self, reload: bool = True):
         """Run the application."""
-        print("🚀 Starting KeyRotator Dashboard...")
-        print(f"📊 Dashboard: http://localhost:{self.port}/api/dashboard")
-        print(f"📚 API Docs: http://localhost:{self.port}/docs")
-        print(f"🔧 Config: {self.config_manager.config_path}")
+        print("Starting KeyRotator Dashboard...")
+        print(f"Dashboard: http://localhost:{self.port}/api/dashboard")
+        print(f"API Docs: http://localhost:{self.port}/docs")
+        print(f"Config: {self.config_manager.config_path}")
 
         uvicorn.run(
-            "keyrotator.app:app_instance",
+            "keyrotator.app:create_app",
             host=self.host,
             port=self.port,
             reload=reload,
             reload_dirs=["."],
             log_level="info",
+            factory=True,
         )
 
 

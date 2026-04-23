@@ -14,9 +14,9 @@ from pathlib import Path
 def check_python_version():
     """Check if Python version is compatible."""
     if sys.version_info < (3, 8):
-        print("❌ Python 3.8+ required")
+        print("ERROR: Python 3.8+ required")
         return False
-    print(f"✅ Python {sys.version.split()[0]}")
+    print(f"OK: Python {sys.version.split()[0]}")
     return True
 
 
@@ -24,18 +24,18 @@ def install_dependencies():
     """Install required dependencies."""
     requirements_file = Path(__file__).parent / "requirements.txt"
     if requirements_file.exists():
-        print("📦 Installing dependencies...")
+        print("Installing dependencies...")
         try:
             subprocess.check_call(
                 [sys.executable, "-m", "pip", "install", "-r", str(requirements_file)]
             )
-            print("✅ Dependencies installed")
+            print("OK: Dependencies installed")
             return True
         except subprocess.CalledProcessError:
-            print("❌ Failed to install dependencies")
+            print("ERROR: Failed to install dependencies")
             return False
     else:
-        print("⚠️  requirements.txt not found")
+        print("WARNING: requirements.txt not found")
         return False
 
 
@@ -43,13 +43,13 @@ def create_config_directory():
     """Create config directory if it doesn't exist."""
     config_dir = Path.home() / ".keyrotator"
     config_dir.mkdir(exist_ok=True)
-    print(f"✅ Config directory: {config_dir}")
+    print(f"OK: Config directory: {config_dir}")
     return True
 
 
 def main():
     """Main setup function."""
-    print("🚀 Setting up KeyRotator Mission Control")
+    print("Setting up KeyRotator Mission Control")
     print("=" * 50)
 
     if not check_python_version():
@@ -62,14 +62,14 @@ def main():
         return False
 
     print()
-    print("🎉 Setup complete!")
+    print("Setup complete!")
     print()
     print("To start KeyRotator:")
     print("  python app.py")
     print()
     print("Then visit: http://localhost:8000/api/dashboard")
     print()
-    print("Happy coding! 🚀")
+    print("Happy coding!")
 
     return True
 

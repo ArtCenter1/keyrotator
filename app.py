@@ -24,7 +24,7 @@ from keyrotator import KeyRotatorApp
 
 def main():
     """Main entry point for KeyRotator."""
-    print("🚀 Starting KeyRotator Mission Control...")
+    print("Starting KeyRotator Mission Control...")
 
     # Create and run the app
     app = KeyRotatorApp()
