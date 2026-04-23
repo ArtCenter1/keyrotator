@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KeyRotator — Mission Control</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-secondary: #1a1d23;
+    --card: rgba(30, 41, 59, 0.8);
+    --card-hover: rgba(30, 41, 59, 0.9);
+    --border: rgba(255, 255, 255, 0.1);
+    --border-hover: rgba(255, 255, 255, 0.2);
+    --accent: #8b5cf6;
+    --accent-hover: #7c3aed;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --text: #f8fafc;
+    --text-dim: #94a3b8;
+    --text-muted: #64748b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+  body {
+    background: var(--bg);
+    background-image: radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding: 24px;
+    background: var(--card);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+  }
+
+  .header-left h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+
+  .header-left .subtitle {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+
+  .controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .status-badge {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+  }
+
+  .btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+  .btn-secondary {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .btn-secondary:hover { border-color: var(--border-hover); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    backdrop-filter: blur(12px);
+    transition: all 0.3s ease;
+  }
+
+  .card:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .card-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .provider-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+  }
+
+  .provider-gemini { background: linear-gradient(135deg, #4285f4, #34a853); }
+  .provider-openrouter { background: linear-gradient(135deg, #ff6b35, #f7931e); }
+  .provider-kilo { background: linear-gradient(135deg, #8b5cf6, #a855f7); }
+  .provider-kimi { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+  .provider-nvidia-nim { background: linear-gradient(135deg, #76b900, #4ade80); }
+
+  .metric {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .metric:last-child { border-bottom: none; }
+
+  .metric-label { color: var(--text-dim); }
+  .metric-value { font-weight: 600; }
+
+  .keys-list {
+    margin-top: 16px;
+  }
+
+  .key-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
+  }
+
+  .key-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .key-alias {
+    font-weight: 500;
+    font-family: monospace;
+  }
+
+  .key-status {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .status-healthy { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+  .status-rate_limited { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+  .status-spent, .status-dead { background: rgba(239, 68, 68, 0.2); color: var(--error); }
+
+  .key-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .key-action-btn {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+
+  .key-action-btn:hover { color: var(--text); background: var(--bg); }
+
+  .add-key-form {
+    margin-top: 16px;
+    padding: 16px;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 8px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 0.9rem;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .modal.show {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .modal-content {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 500px;
+    width: 90%;
+    border: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .modal-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+
+  .modal-close:hover {
+    color: var(--text);
+    background: var(--bg-secondary);
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(12px);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 1001;
+  }
+
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    .container { padding: 16px; }
+    .header { flex-direction: column; gap: 16px; text-align: center; }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="header-left">
+      <h1><i class="fas fa-key"></i> KeyRotator</h1>
+      <div class="subtitle">Mission Control Dashboard</div>
+    </div>
+    <div class="controls">
+      <div class="status-badge" id="dev-mode">
+        <i class="fas fa-code"></i>
+        <span>Development Mode</span>
+      </div>
+      <div class="status-badge" id="refresh-timer">
+        <i class="fas fa-clock"></i>
+        <span>Refreshing in 30s</span>
+      </div>
+      <button class="btn" onclick="refresh()">
+        <i class="fas fa-sync-alt"></i>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <div class="grid" id="providers-grid"></div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <i class="fas fa-plus-circle"></i>
+          Add New API Key
+        </div>
+      </div>
+      <div class="add-key-form">
+        <div class="form-group">
+          <label for="provider-select">Provider</label>
+          <select class="form-input" id="provider-select">
+            <option value="">Select Provider...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="key-input">API Key</label>
+          <input type="password" class="form-input" id="key-input" placeholder="Enter your API key...">
+        </div>
+        <div class="form-group">
+          <label for="alias-input">Alias (Optional)</label>
+          <input type="text" class="form-input" id="alias-input" placeholder="e.g., Free Tier Key #1">
+        </div>
+        <div class="form-actions">
+          <button class="btn" onclick="addKey()">
+            <i class="fas fa-plus"></i>
+            Add Key
+          </button>
+          <button class="btn btn-secondary" onclick="clearForm()">
+            <i class="fas fa-times"></i>
+            Clear
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <i class="fas fa-chart-line"></i>
+          System Status
+        </div>
+      </div>
+      <div id="system-metrics">
+        <div class="metric">
+          <span class="metric-label">Total Providers</span>
+          <span class="metric-value" id="total-providers">-</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Total Keys</span>
+          <span class="metric-value" id="total-keys">-</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Healthy Keys</span>
+          <span class="metric-value" id="healthy-keys">-</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Last Updated</span>
+          <span class="metric-value" id="last-updated">-</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="confirm-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title">Confirm Action</div>
+      <button class="modal-close" onclick="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div id="modal-body">
+      Are you sure you want to delete this key?
+    </div>
+    <div class="form-actions" style="margin-top: 20px;">
+      <button class="btn" id="confirm-btn" onclick="confirmAction()">
+        <i class="fas fa-check"></i>
+        Confirm
+      </button>
+      <button class="btn btn-secondary" onclick="closeModal()">
+        <i class="fas fa-times"></i>
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let data = {initial_json};
+let refreshInterval = 30;
+let countdown = refreshInterval;
+let autoRefreshTimer;
+
+function init() {{
+  render();
+  startAutoRefresh();
+}}
+
+function render() {{
+  renderProviders();
+  renderSystemMetrics();
+  renderProviderSelect();
+}}
+
+function renderProviders() {{
+  const grid = document.getElementById('providers-grid');
+  const providers = (data && data.providers) || [];
+  const pools = (data && data.pools) || [];
+
+  grid.innerHTML = providers.map(provider => {{
+    const pool = pools.find(p => p.provider === provider.name);
+    const providerClass = `provider-${{provider.name.toLowerCase().replace(/[^a-z0-9]/g, '')}}`;
+
+    return `
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <div class="provider-icon ${{providerClass}}">
+              <i class="fas fa-robot"></i>
+            </div>
+            ${{provider.display_name}}
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span class="metric-value">${{provider.key_count || 0}} keys</span>
+            <label class="switch">
+              <input type="checkbox"
+                     ${{provider.enabled ? 'checked' : ''}}
+                     onchange="toggleProvider('${{provider.name}}', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        ${{pool ? renderPoolData(pool) : '<div style="color: var(--text-dim); text-align: center; padding: 20px;">No active pool</div>'}}
+
+        <div class="keys-list" id="keys-${{provider.name}}">
+          ${{renderKeysForProvider(provider.name)}}
+        </div>
+      </div>
+    `;
+  }}).join('');
+}}
+
+function renderPoolData(pool) {{
+  return `
+    <div style="margin-bottom: 16px;">
+      <div class="metric">
+        <span class="metric-label">Health</span>
+        <span class="metric-value" style="color: var(--success);">${{pool.health_pct}}%</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Healthy Keys</span>
+        <span class="metric-value">${{pool.healthy_keys}}/${{pool.total_keys}}</span>
+      </div>
+    </div>
+  `;
+}}
+
+function renderKeysForProvider(providerName) {{
+  const config = data.config || {{keys: []}};
+  const providerKeys = config.keys.filter(k => k.provider === providerName);
+
+  return providerKeys.map(key => `
+    <div class="key-item">
+      <div class="key-info">
+        <span class="key-alias">${{key.alias || 'Unnamed Key'}}</span>
+        <span class="key-status status-healthy">Enabled</span>
+      </div>
+      <div class="key-actions">
+        <button class="key-action-btn" onclick="reviveKey('${{providerName}}', ${{key.index}})" title="Revive Key">
+          <i class="fas fa-refresh"></i>
+        </button>
+        <button class="key-action-btn" onclick="deleteKey('${{providerName}}', ${{key.index}})" title="Delete Key">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}}
+
+function renderSystemMetrics() {{
+  const providers = (data && data.providers) || [];
+  const pools = (data && data.pools) || [];
+  const totalKeys = pools.reduce((sum, p) => sum + (p.total_keys || 0), 0);
+  const healthyKeys = pools.reduce((sum, p) => sum + (p.healthy_keys || 0), 0);
+
+  const totalProvidersEl = document.getElementById('total-providers');
+  const totalKeysEl = document.getElementById('total-keys');
+  const healthyKeysEl = document.getElementById('healthy-keys');
+  const lastUpdatedEl = document.getElementById('last-updated');
+
+  if (totalProvidersEl) totalProvidersEl.textContent = providers.length;
+  if (totalKeysEl) totalKeysEl.textContent = totalKeys;
+  if (healthyKeysEl) healthyKeysEl.textContent = healthyKeys;
+  if (lastUpdatedEl) lastUpdatedEl.textContent = new Date().toLocaleTimeString();
+}}
+
+function renderProviderSelect() {{
+  const select = document.getElementById('provider-select');
+  if (!select) return;
+
+  const currentOptions = Array.from(select.options).map(o => o.value);
+
+  ((data && data.providers) || []).forEach(provider => {{
+    if (provider && provider.name && provider.display_name && !currentOptions.includes(provider.name)) {{
+      const option = document.createElement('option');
+      option.value = provider.name;
+      option.textContent = provider.display_name;
+      select.appendChild(option);
+    }}
+  }});
+}}
+
+async function refresh() {{
+  try {{
+    const response = await fetch('/api/status');
+    if (!response.ok) {{
+      throw new Error(`HTTP ${{response.status}}: ${{response.statusText}}`);
+    }}
+    const newData = await response.json();
+    if (newData && typeof newData === 'object') {{
+      data = newData;
+      render();
+      countdown = refreshInterval;
+      updateRefreshTimer();
+      showToast('Data refreshed', 'success');
+    }} else {{
+      throw new Error('Invalid response format');
+    }}
+  }} catch (error) {{
+    console.error('Refresh failed:', error);
+    showToast('Failed to refresh data: ' + error.message, 'error');
+  }}
+}}
+
+function startAutoRefresh() {{
+  autoRefreshTimer = setInterval(() => {{
+    countdown--;
+    updateRefreshTimer();
+
+    if (countdown <= 0) {{
+      refresh();
+    }}
+  }}, 1000);
+}}
+
+function updateRefreshTimer() {{
+  const timerEl = document.getElementById('refresh-timer');
+  const span = timerEl.querySelector('span');
+  span.textContent = `Refreshing in ${{countdown}}s`;
+}}
+
+async function addKey() {{
+  const provider = document.getElementById('provider-select').value;
+  const key = document.getElementById('key-input').value;
+  const alias = document.getElementById('alias-input').value;
+
+  if (!provider || !key) {{
+    showToast('Please fill in all required fields', 'error');
+    return;
+  }}
+
+  try {{
+    const response = await fetch('/api/keys', {{
+      method: 'POST',
+      headers: {{ 'Content-Type': 'application/json' }},
+      body: JSON.stringify({{ provider, key, alias }})
+    }});
+
+    if (response.ok) {{
+      showToast('Key added successfully', 'success');
+      clearForm();
+      refresh();
+    }} else {{
+      const error = await response.json();
+      showToast(error.detail || 'Failed to add key', 'error');
+    }}
+  }} catch (error) {{
+    showToast('Failed to add key', 'error');
+  }}
+}}
+
+function clearForm() {{
+  document.getElementById('provider-select').value = '';
+  document.getElementById('key-input').value = '';
+  document.getElementById('alias-input').value = '';
+}}
+
+async function deleteKey(provider, index) {{
+  document.getElementById('modal-body').textContent = `Are you sure you want to delete the key "${{data.config.keys.find(k => k.provider === provider && k.index === index)?.alias || 'Unnamed'}}" from ${{provider}}?`;
+  document.getElementById('confirm-btn').onclick = () => confirmDelete(provider, index);
+  document.getElementById('confirm-modal').classList.add('show');
+}}
+
+async function confirmDelete(provider, index) {{
+  try {{
+    const response = await fetch(`/api/keys/${{provider}}/${{index}}`, {{
+      method: 'DELETE'
+    }});
+
+    if (response.ok) {{
+      showToast('Key deleted successfully', 'success');
+      closeModal();
+      refresh();
+    }} else {{
+      showToast('Failed to delete key', 'error');
+    }}
+  }} catch (error) {{
+    showToast('Failed to delete key', 'error');
+  }}
+}}
+
+async function reviveKey(provider, index) {{
+  try {{
+    const response = await fetch('/api/revive', {{
+      method: 'POST',
+      headers: {{ 'Content-Type': 'application/json' }},
+      body: JSON.stringify({{ provider, key_index: index }})
+    }});
+
+    if (response.ok) {{
+      showToast('Key revived successfully', 'success');
+      refresh();
+    }} else {{
+      showToast('Failed to revive key', 'error');
+    }}
+  }} catch (error) {{
+    showToast('Failed to revive key', 'error');
+  }}
+}}
+
+async function toggleProvider(provider, enabled) {{
+  try {{
+    const response = await fetch(`/api/providers/${{provider}}`, {{
+      method: 'PUT',
+      headers: {{ 'Content-Type': 'application/json' }},
+      body: JSON.stringify({{ enabled }})
+    }});
+
+    if (response.ok) {{
+      showToast(`Provider ${{enabled ? 'enabled' : 'disabled'}}`, 'success');
+      refresh();
+    }} else {{
+      showToast('Failed to update provider', 'error');
+    }}
+  }} catch (error) {{
+    showToast('Failed to update provider', 'error');
+  }}
+}}
+
+function closeModal() {{
+  document.getElementById('confirm-modal').classList.remove('show');
+}}
+
+function showToast(message, type = 'info') {{
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = `toast show toast-${{type}}`;
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}}
+
+// Add toggle switch styles
+const style = document.createElement('style');
+style.textContent = `
+  .switch {{
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+  }}
+
+  .switch input {{ opacity: 0; width: 0; height: 0; }}
+
+  .slider {{
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-secondary);
+    transition: .4s;
+    border-radius: 20px;
+  }}
+
+  .slider:before {{
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }}
+
+  input:checked + .slider {{
+    background-color: var(--accent);
+  }}
+
+  input:checked + .slider:before {{
+    transform: translateX(20px);
+  }}
+`;
+document.head.appendChild(style);
+
+// Initialize when DOM is loaded
+if (document.readyState === 'loading') {{
+  document.addEventListener('DOMContentLoaded', init);
+}} else {{
+  init();
+}}
+
+// Safety check for data initialization
+if (typeof data === 'undefined' || !data) {{
+  console.error('Dashboard data not loaded properly');
+  data = { providers: [], pools: [] };
+}}
+</script>
+</body>
+</html>

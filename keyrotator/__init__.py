@@ -1,18 +1,46 @@
 """
-keyrotator — Plug-and-play API key rotation for FastAPI projects.
+KeyRotator — Professional API Key Management Dashboard
+
+A plug-and-play API key rotation system for development environments.
+Manage multiple API keys across providers with automatic rotation, health monitoring,
+and a comprehensive mission control dashboard.
+
+Features:
+- Dynamic key management via web dashboard
+- Automatic rotation and failover
+- Real-time health monitoring and analytics
+- Provider-agnostic architecture
+- Configuration persistence
+- Development-mode detection
 
 Usage:
-    from keyrotator import KeyPool, KeyRotatorRouter, AllKeysExhaustedError
+    from keyrotator import KeyRotatorApp
 
-    gemini_pool  = KeyPool("gemini",     keys=["key1", "key2", ...])
-    router_pool  = KeyPool("openrouter", keys=["sk-or-...", ...])
+    # Create and run the dashboard
+    app = KeyRotatorApp()
+    app.run()
 
-    app.include_router(
-        KeyRotatorRouter([gemini_pool, router_pool]),
-        prefix="/dev"
-    )
+    # Or integrate into existing FastAPI app
+    from keyrotator import KeyRotatorRouter, ConfigManager
+
+    config = ConfigManager()
+    app.include_router(KeyRotatorRouter(config), prefix="/keyrotator")
 """
+
 from keyrotator.pool import KeyPool, KeyEntry, KeyState, AllKeysExhaustedError
 from keyrotator.router import KeyRotatorRouter
+from keyrotator.config import ConfigManager, KeyRotatorConfig, ProviderConfig, KeyConfig
+from keyrotator.app import KeyRotatorApp
 
-__all__ = ["KeyPool", "KeyEntry", "KeyState", "AllKeysExhaustedError", "KeyRotatorRouter"]
+__all__ = [
+    "KeyPool",
+    "KeyEntry",
+    "KeyState",
+    "AllKeysExhaustedError",
+    "KeyRotatorRouter",
+    "ConfigManager",
+    "KeyRotatorConfig",
+    "ProviderConfig",
+    "KeyConfig",
+    "KeyRotatorApp",
+]
