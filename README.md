@@ -9,6 +9,11 @@
 
 KeyRotator is a plug-and-play API key rotation system designed for development and testing environments. It provides a comprehensive mission control dashboard to manage multiple API keys across different providers, with automatic rotation, health monitoring, and real-time analytics.
 
+## 📸 Mission Control Dashboard
+
+![KeyRotator Mission Control Dashboard](https://via.placeholder.com/800x600/0f1419/8b5cf6?text=KeyRotator+Mission+Control+Dashboard)
+*Screenshot of the KeyRotator Mission Control dashboard showing real-time key monitoring, provider status, and management interface*
+
 ## ✨ Features
 
 ### 🔑 **Smart Key Management**
